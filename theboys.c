@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -11,7 +10,7 @@
 #define N_HABILIDADES 10
 #define N_HEROIS (N_HABILIDADES * 5)
 #define N_BASES (N_HEROIS / 6)
-#define N_MISSOES (T_FIM_DO_MUNDO / 100)
+#define N_MISSOES 5
 
 int aleato(int min, int max)
 {
@@ -188,7 +187,7 @@ struct mundo *cria_mundo()
         m->missoes[i] = cria_missao(i, m);
 
     for (int i = 0; i < N_HABILIDADES; i++)
-        insere_cjt(m->habilidades_mundo, i);
+        insere_cjt(m->habilidades_mundo, i + 1);
 
     return m;
 }
@@ -214,22 +213,97 @@ struct mundo *destroi_mundo(struct mundo *m)
     return NULL;
 }
 
+// Função para imprimir as propriedades dos heróis
+void imprime_herois_mundo(struct mundo *m)
+{
+    if (m)
+    {
+        for (int i = 0; i < m->n_herois; i++)
+        {
+            struct heroi *heroi = m->herois[i];
+            if (heroi)
+            {
+                printf("Herói %d:\n", heroi->id);
+                printf("Paciência: %d\n", heroi->paciencia);
+                printf("Velocidade: %d\n", heroi->velocidade);
+                printf("Experiência: %d\n", heroi->experiencia);
+                printf("Habilidades do Herói:\n");
+                imprime_cjt(heroi->habilidades_heroi);
+                printf("\n");
+            }
+        }
+    }
+}
+
+// Função para imprimir as propriedades das bases
+void imprime_bases_mundo(struct mundo *m)
+{
+    if (m)
+    {
+        for (int i = 0; i < m->n_bases; i++)
+        {
+            struct base *base = m->bases[i];
+            if (base)
+            {
+                printf("Base %d:\n", base->idBase);
+                printf("Lotação: %d\n", base->lotacao);
+                printf("Localização: (%d, %d)\n", base->local_base.x, base->local_base.y);
+                printf("Heróis Presentes na Base:\n");
+                imprime_cjt(base->presente);
+                printf("Heróis na Fila de Espera:\n");
+                fila_imprime(base->espera);
+                printf("\n");
+            }
+        }
+    }
+}
+
+// Função para imprimir as propriedades das missões
+void imprime_missoes_mundo(struct mundo *m)
+{
+    if (m)
+    {
+        for (int i = 0; i < m->n_missoes; i++)
+        {
+            struct missao *missao = m->missoes[i];
+            printf("Missão %d:\n", missao->id);
+            printf("Localização da Missão: (%d, %d)\n", missao->local_missao.x, missao->local_missao.y);
+            printf("Habilidades Necessárias:\n");
+            imprime_cjt(missao->habilidades_necessarias);
+            printf("\n");
+        }
+    }
+}
+
 /*---------------------------------------------------------------------------------------------*/
 /* demais includes */
 /* funcoes que voce ache necessarias aqui */
 
 int main()
 {
-    /* declaracoes de variaveis aqui */
+    /* declarações de variáveis aqui */
     struct mundo *mundo;
     srand(0);
 
     printf("\nIniciando o mundo, bases e heróis\n");
-    /* coloque seu codigo aqui */
     mundo = cria_mundo();
 
+    // Vendo as habilidades do mundo
+    printf("\nHabilidades existentes no mundo:\n");
+    imprime_cjt(mundo->habilidades_mundo);
+
+    // Teste das funções de impressão
+    printf("\nPropriedades dos Heróis:\n");
+    imprime_herois_mundo(mundo);
+
+    printf("\nPropriedades das Bases:\n");
+    imprime_bases_mundo(mundo);
+
+    printf("\nPropriedades das Missões:\n");
+    imprime_missoes_mundo(mundo);
+
     printf("\ndestruindo o mundo, bases e heróis\n");
-    /* Destuir tudo que iniciei destro da função mundo. */
+    /* Destruir tudo que iniciei dentro da função mundo. */
     mundo = destroi_mundo(mundo);
 
     return 0;

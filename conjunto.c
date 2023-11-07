@@ -17,7 +17,7 @@ int busca_binaria(int x, struct conjunto *c)
     ini = 0;
     fim = c->card - 1;
     meio = (ini + fim) / 2;
-    
+
     while (ini <= fim && x != c->v[meio])
     {
         if (x < c->v[meio])
@@ -147,7 +147,7 @@ int insere_cjt(struct conjunto *c, int elemento)
     else if (pertence_cjt(c, elemento))
         return 1;
 
-    i = c->card-1;
+    i = c->card - 1;
     while (elemento < c->v[i])
     {
         c->v[i + 1] = c->v[i];
@@ -289,40 +289,57 @@ struct conjunto *interseccao_cjt(struct conjunto *c1, struct conjunto *c2)
 struct conjunto *uniao_cjt(struct conjunto *c1, struct conjunto *c2)
 {
     struct conjunto *uni;
-    int i, j, k;
-    int tam_max;
+    int i = 0, j = 0, k = 0;
 
-    /* tamanho maximo possivel caso os conjuntos possuam todos
-     * os elementos diferentes */
-    tam_max = c1->card + c2->card;
+    if (!c1 || !c2)
+        return NULL;
+
+    if (c1->card == 0)
+        return copia_cjt(c2);
+
+    if (c2->card == 0)
+        return copia_cjt(c1);
+
+    int tam_max = c1->card + c2->card;
 
     if (!(uni = cria_cjt(tam_max)))
         return NULL;
 
-    i = 0;
-    j = 0;
-    k = 0;
     while (i < c1->card && j < c2->card)
     {
         if (c1->v[i] < c2->v[j])
         {
             uni->v[k] = c1->v[i];
             i++;
-            k++;
         }
-        if (c1->v[i] > c2->v[j])
+        else if (c1->v[i] > c2->v[j])
+        {
+            uni->v[k] = c2->v[j];
             j++;
+        }
         else
         {
+            uni->v[k] = c1->v[i]; // Ou c2->v[j], pois ambos são iguais
             i++;
             j++;
         }
+        k++;
     }
 
-    for (int l = i; l < c1->card-1; l++)
+    // Copie os elementos restantes de c1, se houver
+    while (i < c1->card)
     {
+        uni->v[k] = c1->v[i];
+        i++;
         k++;
-        uni->v[k] = c1->v[l];
+    }
+
+    // Copie os elementos restantes de c2, se houver
+    while (j < c2->card)
+    {
+        uni->v[k] = c2->v[j];
+        j++;
+        k++;
     }
 
     uni->card = k;
@@ -424,14 +441,14 @@ int incrementa_iterador_cjt(struct conjunto *c, int *ret_iterador)
 int retira_um_elemento_cjt(struct conjunto *c)
 {
     int indice;
-    int elemento; 
+    int elemento;
 
-    indice = aleat(0, c->card-1);
+    indice = aleat(0, c->card - 1);
     elemento = c->v[indice];
 
     c->v[indice] = c->v[c->card - 1];
     c->card--;
-    quickSort(c->v, 0, c->card-1);
+    quickSort(c->v, 0, c->card - 1);
 
     return elemento;
 }
