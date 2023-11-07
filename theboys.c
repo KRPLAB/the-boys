@@ -13,6 +13,11 @@
 #define N_BASES (N_HEROIS / 6)
 #define N_MISSOES (T_FIM_DO_MUNDO / 100)
 
+int aleato(int min, int max)
+{
+    return min + rand() % (max - min + 1);
+}
+
 
 struct coordenada 
 {
@@ -63,19 +68,22 @@ struct mundo
 
 void cria_herois(struct mundo *m)
 {
-    for(int i = 0; i < N_HEROIS; i++)
+    for (int i = 0; i < N_HEROIS; i++)
     {
+        m->herois[i] = malloc(sizeof(struct heroi));
         m->herois[i]->id = i;
-        m->herois[i]->paciencia = aleat(0, 100);
-        m->herois[i]->velocidade = aleat(50, 5000);
+        m->herois[i]->paciencia = aleato(0, 100);
+        m->herois[i]->velocidade = aleato(50, 5000);
         m->herois[i]->experiencia = 0;
         m->herois[i]->habilidades_heroi = cria_subcjt_cjt(m->habilidades_mundo, 3);
     }
 }
 
+
 struct heroi *destroi_heroi(struct heroi *heroi)
 {
-    heroi->habilidades_heroi = destroi_cjt(heroi->habilidades_heroi);   
+    heroi->habilidades_heroi = destroi_cjt(heroi->habilidades_heroi);
+    free(heroi);
     return heroi;
 }
 
@@ -96,11 +104,11 @@ struct base *cria_base(int id)
         return NULL;
 
     b->idBase = id;
-    b->lotacao = aleat(3, 10);
+    b->lotacao = aleato(3, 10);
     b->presente = cria_cjt(b->lotacao);
     b->espera = fila_cria();
-    b->local_base.x = aleat(0, TAMANHO_MUNDO-1);
-    b->local_base.y = aleat(0, TAMANHO_MUNDO-1);
+    b->local_base.x = aleato(0, TAMANHO_MUNDO-1);
+    b->local_base.y = aleato(0, TAMANHO_MUNDO-1);
 
     return b; 
 }
@@ -141,20 +149,28 @@ struct mundo *cria_mundo()
 {
     struct mundo *m;
 
-    if(!(m = malloc(sizeof(struct mundo))))
+    if (!(m = malloc(sizeof(struct mundo))))
         return NULL;
-    
+
     m->n_herois = N_HEROIS;
     m->n_bases = N_BASES;
     m->n_missoes = N_MISSOES;
     m->tamanho_mundo = TAMANHO_MUNDO;
     m->timer_mundo = T_FIM_DO_MUNDO;
+
+    // Aloca e inicializa o conjunto de habilidades do mundo
+    m->habilidades_mundo = cria_cjt(N_HABILIDADES);
+    
+    if (!m->habilidades_mundo)
+    {
+        free(m);
+        return NULL;
+    }
+
     cria_herois(m);
     cria_bases_mundo(m);
-    m->habilidades_mundo = cria_cjt(N_HABILIDADES);
 
-    /* preenche o conjunto de habilidades do mundo.*/
-    for(int i = 0; i < N_HABILIDADES; i++)
+    for (int i = 0; i < N_HABILIDADES; i++)
         insere_cjt(m->habilidades_mundo, i);
 
     return m;
@@ -163,19 +179,27 @@ struct mundo *cria_mundo()
 struct mundo *destroi_mundo(struct mundo *m)
 {
     /* Liberar a memória dos heróis. */
-    for(int i = 0; i < N_HEROIS; i++)
+    for (int i = 0; i < N_HEROIS; i++)
+    {
         destroi_heroi(m->herois[i]);
+    }
+
+    
 
     /* Liberar a memória das bases. */
-    for(int i = 0; i < N_BASES; i++)
+    for (int i = 0; i < N_BASES; i++)
+    {
         destroi_base(m->bases[i]);
+    }
 
     m->habilidades_mundo = destroi_cjt(m->habilidades_mundo);
 
-    free(m);
+    free(m); // Libera a memória alocada para a estrutura do mundo
 
     return NULL;
-}   
+}
+
+ 
 
 /*---------------------------------------------------------------------------------------------*/
 /* demais includes */
