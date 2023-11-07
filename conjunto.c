@@ -369,7 +369,7 @@ struct conjunto *cria_subcjt_cjt(struct conjunto *c, int n)
 
     for (int i = 0; i < n; i++)
     {
-        int indice_aleatorio = aleat(0, tam);
+        int indice_aleatorio = aleat(0, tam - 1);
         sub->card++;
         sub->v[i] = c->v[indices_aleatorios[indice_aleatorio]];
         /* substituindo o indice selecionado pelo ultimo indice valido */
