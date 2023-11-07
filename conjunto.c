@@ -410,6 +410,7 @@ void imprime_cjt(struct conjunto *c)
     /* ordena antes de imprimir*/
     quickSort(c->v, 0, c->card - 1);
 
+    printf("[ ");
     for (int i = 0; i < c->card; i++)
     {
         printf("%d", c->v[i]);
@@ -417,7 +418,7 @@ void imprime_cjt(struct conjunto *c)
             printf(" ");
     }
 
-    printf("\n");
+    printf(" ]\n");
     return;
 }
 
