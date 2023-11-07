@@ -63,6 +63,22 @@ struct mundo
     int timer_mundo;
 };
 
+struct heroi *cria_heroi(int id, struct mundo *m)
+{
+    struct heroi *h;
+
+    if (!(h = malloc(sizeof(struct heroi))))
+        return NULL;
+
+    h->id = id;
+    h->paciencia = aleato(0, 100);
+    h->velocidade = aleato(50, 5000);
+    h->experiencia = 0;
+    h->habilidades_heroi = cria_subcjt_cjt(m->habilidades_mundo, aleato(1, 3));
+
+    return h;
+};
+
 void cria_herois(struct mundo *m)
 {
     for (int i = 0; i < N_HEROIS; i++)
@@ -72,7 +88,7 @@ void cria_herois(struct mundo *m)
         m->herois[i]->paciencia = aleato(0, 100);
         m->herois[i]->velocidade = aleato(50, 5000);
         m->herois[i]->experiencia = 0;
-        m->herois[i]->habilidades_heroi = cria_subcjt_cjt(m->habilidades_mundo, 3);
+        m->herois[i]->habilidades_heroi = cria_subcjt_cjt(m->habilidades_mundo, aleato(1, 3));
     }
 }
 
@@ -180,14 +196,14 @@ struct mundo *cria_mundo()
         return NULL;
     }
 
+    for (int i = 0; i < N_HABILIDADES; i++)
+        insere_cjt(m->habilidades_mundo, i + 1);
+
     cria_herois(m);
     cria_bases_mundo(m);
 
     for (int i = 0; i < N_MISSOES; i++)
         m->missoes[i] = cria_missao(i, m);
-
-    for (int i = 0; i < N_HABILIDADES; i++)
-        insere_cjt(m->habilidades_mundo, i + 1);
 
     return m;
 }
