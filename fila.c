@@ -83,3 +83,14 @@ int fila_tamanho (struct fila *fila)
 {
 	return fila->tamanho;
 }
+
+void fila_imprime(struct fila *fila) {
+    struct nodo *atual = fila->ini;
+
+    printf("[ ");
+    while (atual != NULL) {
+        printf("%d ", atual->chave);
+        atual = atual->prox;
+    }
+    printf("]\n");
+}
