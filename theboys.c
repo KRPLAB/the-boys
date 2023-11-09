@@ -63,6 +63,9 @@ struct mundo
     int timer_mundo;
 };
 
+
+/* ---------------- Funcoes que tratam dos herois no mundo ---------------- */
+
 struct heroi *cria_heroi(int id, struct mundo *m)
 {
     struct heroi *h;
@@ -79,19 +82,6 @@ struct heroi *cria_heroi(int id, struct mundo *m)
     return h;
 };
 
-void cria_herois(struct mundo *m)
-{
-    for (int i = 0; i < N_HEROIS; i++)
-    {
-        m->herois[i] = malloc(sizeof(struct heroi));
-        m->herois[i]->id = i;
-        m->herois[i]->paciencia = aleato(0, 100);
-        m->herois[i]->velocidade = aleato(50, 5000);
-        m->herois[i]->experiencia = 0;
-        m->herois[i]->habilidades_heroi = cria_subcjt_cjt(m->habilidades_mundo, aleato(1, 3));
-    }
-}
-
 struct heroi *destroi_heroi(struct heroi *heroi)
 {
     heroi->habilidades_heroi = destroi_cjt(heroi->habilidades_heroi);
@@ -99,13 +89,34 @@ struct heroi *destroi_heroi(struct heroi *heroi)
     return heroi;
 }
 
-/* Incrementa experiência dos herós que cumpriram uma missão. */
+
 void incrementaExperiencia();
 
-/* Função auxiliar usada para retornar um herói. */
 void retornaHeroi();
 
-/*---------------------------------------------------------------------------------------------*/
+void imprime_herois_mundo(struct mundo *m)
+{
+    if (m)
+    {
+        for (int i = 0; i < m->n_herois; i++)
+        {
+            struct heroi *heroi = m->herois[i];
+            if (heroi)
+            {
+                printf("Herói %d:\n", heroi->id);
+                printf("Paciência: %d\n", heroi->paciencia);
+                printf("Velocidade: %d\n", heroi->velocidade);
+                printf("Experiência: %d\n", heroi->experiencia);
+                printf("Habilidades do Herói:\n");
+                imprime_cjt(heroi->habilidades_heroi);
+                printf("\n");
+            }
+        }
+    }
+}
+
+
+/* ---------------- Funcoes que tratam das bases no mundo ---------------- */
 
 struct base *cria_base(int id)
 {
@@ -124,12 +135,6 @@ struct base *cria_base(int id)
     return b;
 }
 
-/* loop para criar as bases do mundo */
-void cria_bases_mundo(struct mundo *m)
-{
-    for (int i = 0; i < N_BASES; i++)
-        m->bases[i] = cria_base(i);
-}
 
 /* destruir uma base */
 struct base *destroi_base(struct base *b)
@@ -148,7 +153,8 @@ void habilidadeBase();
 /* Função auxiliar usada para retornar uma base. */
 void retornaBase();
 
-/*---------------------------------------------------------------------------------------------*/
+
+/* ---------------- Funcoes que tratam das missoes no mundo ---------------- */
 
 struct missao *cria_missao(int id, struct mundo *mundo)
 {
@@ -175,7 +181,7 @@ struct missao *destroi_missao(struct missao *missao)
     return NULL;
 }
 
-/* Cria o mundo com os parâmetros. */
+/* ---------------- Funcoes que tratam do mundo ---------------- */
 struct mundo *cria_mundo()
 {
     struct mundo *m;
@@ -196,11 +202,16 @@ struct mundo *cria_mundo()
         return NULL;
     }
 
+    /* cria habilidades do mundo */
     for (int i = 0; i < N_HABILIDADES; i++)
-        insere_cjt(m->habilidades_mundo, i + 1);
+        insere_cjt(m->habilidades_mundo, i);
 
-    cria_herois(m);
-    cria_bases_mundo(m);
+    /* cria os herois do mundo */
+    for (int i = 0; i < N_HEROIS; i++)
+        m->herois[i] = cria_heroi(i, m);
+
+    for (int i = 0; i < N_BASES; i++)
+        m->bases[i] = cria_base(i);
 
     for (int i = 0; i < N_MISSOES; i++)
         m->missoes[i] = cria_missao(i, m);
@@ -210,15 +221,12 @@ struct mundo *cria_mundo()
 
 struct mundo *destroi_mundo(struct mundo *m)
 {
-    /* Liberar a memoria dos herois. */
     for (int i = 0; i < N_HEROIS; i++)
         destroi_heroi(m->herois[i]);
 
-    /* Liberar a memoria das bases. */
     for (int i = 0; i < N_BASES; i++)
         destroi_base(m->bases[i]);
 
-    /* Liberar a memoria das missoes*/
     for (int i = 0; i < N_MISSOES; i++)
         destroi_missao(m->missoes[i]);
 
@@ -229,27 +237,6 @@ struct mundo *destroi_mundo(struct mundo *m)
     return NULL;
 }
 
-// Função para imprimir as propriedades dos heróis
-void imprime_herois_mundo(struct mundo *m)
-{
-    if (m)
-    {
-        for (int i = 0; i < m->n_herois; i++)
-        {
-            struct heroi *heroi = m->herois[i];
-            if (heroi)
-            {
-                printf("Herói %d:\n", heroi->id);
-                printf("Paciência: %d\n", heroi->paciencia);
-                printf("Velocidade: %d\n", heroi->velocidade);
-                printf("Experiência: %d\n", heroi->experiencia);
-                printf("Habilidades do Herói:\n");
-                imprime_cjt(heroi->habilidades_heroi);
-                printf("\n");
-            }
-        }
-    }
-}
 
 // Função para imprimir as propriedades das bases
 void imprime_bases_mundo(struct mundo *m)
@@ -292,8 +279,6 @@ void imprime_missoes_mundo(struct mundo *m)
 }
 
 /*---------------------------------------------------------------------------------------------*/
-/* demais includes */
-/* funcoes que voce ache necessarias aqui */
 
 int main()
 {
