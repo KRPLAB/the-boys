@@ -10,7 +10,7 @@
 #define N_HABILIDADES 10
 #define N_HEROIS (N_HABILIDADES * 5)
 #define N_BASES (N_HEROIS / 6)
-#define N_MISSOES 5
+#define N_MISSOES (T_FIM_DO_MUNDO / 100)
 
 #define E_CHEGA 1
 #define E_ESPERA 2
@@ -20,11 +20,7 @@
 #define E_SAI 6
 #define E_VIAJA 7
 #define E_MISSAO 8
-
-int aleato(int min, int max)
-{
-    return min + rand() % (max - min + 1);
-}
+#define E_FIM 9
 
 struct coordenada
 {
@@ -71,6 +67,11 @@ struct mundo
     int tamanho_mundo;
     int timer_mundo;
 };
+
+int aleato(int min, int max)
+{
+    return min + (rand() % (max - min + 1));
+}
 
 /* ---------------- Funcoes que tratam dos herois no mundo ---------------- */
 
@@ -158,6 +159,29 @@ void habilidadeBase();
 /* Função auxiliar usada para retornar uma base. */
 void retornaBase();
 
+// Função para imprimir as propriedades das bases
+void imprime_bases_mundo(struct mundo *m)
+{
+    if (m)
+    {
+        for (int i = 0; i < m->n_bases; i++)
+        {
+            struct base *base = m->bases[i];
+            if (base)
+            {
+                printf("Base %d:\n", base->idBase);
+                printf("Lotação: %d\n", base->lotacao);
+                printf("Localização: (%d, %d)\n", base->local_base.x, base->local_base.y);
+                printf("Heróis Presentes na Base:\n");
+                imprime_cjt(base->presente);
+                printf("Heróis na Fila de Espera:\n");
+                fila_imprime(base->espera);
+                printf("\n");
+            }
+        }
+    }
+}
+
 /* ---------------- Funcoes que tratam das missoes no mundo ---------------- */
 
 struct missao *cria_missao(int id, struct mundo *mundo)
@@ -183,6 +207,23 @@ struct missao *destroi_missao(struct missao *missao)
         free(missao);
     }
     return NULL;
+}
+
+// Função para imprimir as propriedades das missões
+void imprime_missoes_mundo(struct mundo *m)
+{
+    if (m)
+    {
+        for (int i = 0; i < m->n_missoes; i++)
+        {
+            struct missao *missao = m->missoes[i];
+            printf("Missão %d:\n", missao->id);
+            printf("Localização da Missão: (%d, %d)\n", missao->local_missao.x, missao->local_missao.y);
+            printf("Habilidades Necessárias:\n");
+            imprime_cjt(missao->habilidades_necessarias);
+            printf("\n");
+        }
+    }
 }
 
 /* ---------------- Funcoes que tratam do mundo ---------------- */
@@ -241,222 +282,253 @@ struct mundo *destroi_mundo(struct mundo *m)
     return NULL;
 }
 
-// Função para imprimir as propriedades das bases
-void imprime_bases_mundo(struct mundo *m)
+void inicializa_mundo(struct mundo *mundo, struct lef_t *l)
 {
-    if (m)
-    {
-        for (int i = 0; i < m->n_bases; i++)
-        {
-            struct base *base = m->bases[i];
-            if (base)
-            {
-                printf("Base %d:\n", base->idBase);
-                printf("Lotação: %d\n", base->lotacao);
-                printf("Localização: (%d, %d)\n", base->local_base.x, base->local_base.y);
-                printf("Heróis Presentes na Base:\n");
-                imprime_cjt(base->presente);
-                printf("Heróis na Fila de Espera:\n");
-                fila_imprime(base->espera);
-                printf("\n");
-            }
-        }
-    }
-}
+    int base, tempo;
 
-// Função para imprimir as propriedades das missões
-void imprime_missoes_mundo(struct mundo *m)
-{
-    if (m)
+    // gerando eventos iniciais para cada heroi
+    for (int i = 0; i < N_HEROIS; i++)
     {
-        for (int i = 0; i < m->n_missoes; i++)
-        {
-            struct missao *missao = m->missoes[i];
-            printf("Missão %d:\n", missao->id);
-            printf("Localização da Missão: (%d, %d)\n", missao->local_missao.x, missao->local_missao.y);
-            printf("Habilidades Necessárias:\n");
-            imprime_cjt(missao->habilidades_necessarias);
-            printf("\n");
-        }
+        base = aleato(0, N_BASES - 1);
+        tempo = aleato(0, 4321);
+        insere_lef(l, cria_evento(tempo, E_CHEGA, base, i));
     }
+
+    // gerando eventos iniciais para cada missão
+    for (int i = 0; i < N_MISSOES; i++)
+    {
+        tempo = aleato(0, T_FIM_DO_MUNDO + 1);
+        insere_lef(l, cria_evento(tempo, E_MISSAO, i, base));
+    }
+
+    // gerando evento fim do mundo
+    insere_lef(l, cria_evento(T_FIM_DO_MUNDO, E_FIM, 0, 0));
 }
 
 /*-------------------------------------Funcoes para tratar dos eventos-------------------------*/
 
-void adicionaHeroiNaBase(struct base *base, int heroi_id) {
-    // Certifique-se de que o conjunto presente ainda tem espaço para adicionar heróis
-    if (base->presente->card < base->lotacao) {
-        insere_cjt(base->presente, heroi_id);
-    }
-    // Caso contrário, trate de acordo com a lógica do seu programa, como ignorar ou recusar a adição.
-}
-
-int escolheBaseAleatoria(struct mundo *mundo)
+void adicionaHeroiNaBase(struct base *base, int heroi_id)
 {
-    // Gere um índice de base aleatório entre 0 e (num_bases - 1)
-    int base_aleatoria = aleato(0, N_BASES-1);
-
-    return base_aleatoria;
+    if (base->presente->card < base->lotacao)
+        insere_cjt(base->presente, heroi_id);
 }
 
-struct evento_t *cria_evchega(int tempo, int heroi_id, int base_id)
+int calcularDistancia(int id_base_atual, int id_base_dest, struct mundo *m)
+{
+    struct coordenada p1, p2;
+    int x, y;
+
+    p1 = m->bases[id_base_atual]->local_base;
+    p2 = m->bases[id_base_dest]->local_base;
+    x = (p2.x - p1.x) * (p2.x - p1.x);
+    y = (p2.y - p1.y) * (p2.y - p1.y);
+
+    return sqrt(x + y);
+}
+
+/* Processa um evento VIAJA */
+int ev_viaja(struct mundo *mundo, struct evento_t *viaja, struct lef_t *l)
 {
     struct evento_t *chega;
+    int heroi_id, destino_id;
+    int distancia, duracao;
 
-    if (!(chega = malloc(sizeof(struct evento_t))))
-        return NULL;
+    destino_id = viaja->dado1;
+    heroi_id = viaja->dado2;
 
-    chega->tipo = E_CHEGA;
-    chega->tempo = tempo;
-    chega->dado1 = base_id;
-    chega->dado2 = heroi_id;
+    distancia = calcularDistancia(mundo->herois[heroi_id]->id_base, viaja->dado1, mundo);
+    duracao = distancia / mundo->herois[heroi_id]->velocidade;
 
-    return chega;
+    if (!(chega = cria_evento(viaja->tempo + duracao, E_CHEGA, destino_id, heroi_id)))
+        return 0;
+
+    insere_lef(l, chega);
+
+    return 1;
 }
 
-void process_evchega(struct mundo *mundo, struct evento_t *chega)
+/* Processa um evento CHEGA */
+int ev_chega(struct mundo *mundo, struct evento_t *chega, struct lef_t *l)
 {
-    struct base *base;
     struct heroi *heroi;
-    int base_id;
-    int heroi_id;
+    int base_id, heroi_id;
     int espera;
 
     base_id = chega->dado1;
     heroi_id = chega->dado2;
 
-    base = mundo->bases[base_id];
     heroi = mundo->herois[heroi_id];
-
     heroi->id_base = base_id;
 
-    if (base->espera->tamanho == 0 && base->presente->card < base->lotacao)
+    if (mundo->bases[base_id]->espera->tamanho == 0 &&
+        mundo->bases[base_id]->presente->card < mundo->bases[base_id]->lotacao)
         espera = 1;
 
     else
-        espera = heroi->paciencia > (base->espera->tamanho * 10);
+        espera = heroi->paciencia > (mundo->bases[base_id]->espera->tamanho * 10);
 
     if (espera)
-        printf("Herói %d decidiu ESPERAR na Base %d.\n", heroi_id, base_id);
+    {
+        insere_lef(l, cria_evento(chega->tempo, E_ESPERA, base_id, heroi_id));
+        printf("%6d: CHEGA  HEROI %2d BASE %d (%2d/%2d) ESPERA\n", chega->tempo, 
+                heroi_id, base_id, mundo->bases[base_id]->presente->card, 
+                mundo->bases[base_id]->lotacao);
+    }
 
     else
     {
-        // Cria evento DESISTE
-        // Supondo que você tenha uma função para adicionar um evento à lista de eventos
-        // adicionarEvento(criaEventoDESISTE(evento.instante, heroi_id, base_id));
-        printf("Herói %d decidiu DESISTIR na Base %d.\n", heroi_id, base_id);
-    }
-}
-
-// Função para criar um evento ESPERA
-struct evento_t *cria_evespera(int tempo, int heroi_id, int base_id)
-{
-    struct evento_t *espera;
-
-    if (!(espera = malloc(sizeof(struct evento_t))))
-        return NULL;
-
-    espera->tipo = E_ESPERA;
-    espera->tempo = tempo;
-    espera->dado1 = base_id;
-    espera->dado2 = heroi_id;
-
-    return espera;
-}
-
-// Função para criar um evento DESISTE
-struct evento_t *cria_evdesiste(int tempo, int heroi_id, int base_id)
-{
-    struct evento_t *desiste;
-
-    if (!(desiste = malloc(sizeof(struct evento_t))))
-        return NULL;
-
-    desiste->tipo = E_DESISTE;
-    desiste->tempo = tempo;
-    desiste->dado1 = base_id;
-    desiste->dado2 = heroi_id;
-
-    return desiste;
-}
-
-// Função para criar um evento AVISA
-struct evento_t *cria_avisa(int tempo, int base_id)
-{
-    struct evento_t *avisa;
-
-    if (!(avisa = malloc(sizeof(struct evento_t))))
-        return NULL;
-
-    avisa->tipo = E_AVISA;
-    avisa->tempo = tempo;
-    avisa->dado1 = base_id;
-    avisa->dado2 = 0;
-
-    return avisa;
-}
-
-// Função para processar o evento ESPERA
-void process_evespera(struct mundo *mundo, struct evento_t *espera)
-{
-    int base_id = espera->dado1;
-    int heroi_id = espera->dado2;
-
-    struct base *base = mundo->bases[base_id];
-
-    // Adiciona o herói à fila de espera da base
-    if (base->espera->tamanho < base->lotacao)
-    {
-        enqueue(base->espera, heroi_id);
-    }
-    else
-    {
-        // A fila de espera está cheia, herói não pode esperar
-        // Crie um evento DESISTE ou lide com isso de acordo com a lógica do seu programa.
-        printf("A fila de espera da Base %d está cheia. Herói %d desistiu.\n", base_id, heroi_id);
-        return;
+        insere_lef(l, cria_evento(chega->tempo, E_DESISTE, base_id, heroi_id));
+        printf("%6d: CHEGA  HEROI %2d BASE %d (%2d/%2d) DESISTE\n", chega->tempo, 
+                heroi_id, base_id, mundo->bases[base_id]->presente->card, 
+                mundo->bases[base_id]->lotacao);
     }
 
-    // Cria evento AVISA
-    struct evento_t *avisa = cria_avisa(espera->tempo, base_id);
-    avisa = destroi_evento(avisa);
-    // Supondo que você tenha uma função para adicionar um evento à lista de eventos
-    // adicionarEvento(avisa);
-    printf("Herói %d entrou na fila de espera da Base %d.\n", heroi_id, base_id);
+    return 1;
 }
 
-// Função para processar o evento DESISTE
-void process_evdesiste(struct mundo *mundo, struct evento_t *desiste)
+/* Processa um evento ESPERA */
+int ev_espera(struct mundo *mundo, struct evento_t *espera, struct lef_t *l)
 {
-    int base_id = desiste->dado1;
-    int heroi_id = desiste->dado2;
+    struct base *base;
+    int base_id, heroi_id;
 
-    // Suponha que você tenha uma função para escolher uma base destino D aleatória
-    int destino_id = escolheBaseAleatoria(mundo);
+    base_id = espera->dado1;
+    heroi_id = espera->dado2;
 
-    // Cria evento VIAJA
-    // Supondo que você tenha uma função para adicionar um evento à lista de eventos
-    // adicionarEvento(criaEventoVIAJA(desiste->tempo, heroi_id, destino_id));
-    printf("Herói %d desistiu de entrar na Base %d e escolheu viajar para a Base %d.\n", heroi_id, base_id, destino_id);
+    base = mundo->bases[base_id];
+
+    enqueue(base->espera, heroi_id);
+
+    insere_lef(l, cria_evento(espera->tempo, E_AVISA, base_id, heroi_id));
+    printf("%6d: ESPERA HEROI %2d BASE %d (%2d)\n", espera->tempo, heroi_id, base_id,
+            base->espera->tamanho);
+
+    return 1;
 }
 
-// Função para processar o evento AVISA
-void process_avisa(struct mundo *mundo, struct evento_t *avisa)
+/* Processa um evento DESISTE */
+int ev_desiste(struct mundo *mundo, struct evento_t *desiste, struct lef_t *l)
 {
-    int base_id = avisa->dado1;
-    struct base *base = mundo->bases[base_id];
+    int base_id, heroi_id;
+    int destino_id;
+
+    base_id = desiste->dado1;
+    heroi_id = desiste->dado2;
+    destino_id = aleato(0, N_BASES - 1);
+
+    insere_lef(l, cria_evento(desiste->tempo, E_VIAJA, destino_id, heroi_id));
+    printf("%6d: DESIST HEROI %2d BASE %d\n", desiste->tempo, heroi_id, base_id);
+
+    return 1;
+}
+
+/* Processa um evento ENTRA */
+int ev_entra(struct mundo *mundo, struct evento_t *entra, struct lef_t *l)
+{
+    int tpb; // tempo de permanencia na base
+    int heroi_id;
+
+    heroi_id = entra->dado2;
+
+    tpb = 15 + mundo->herois[heroi_id]->paciencia * aleato(1, 20);
+
+    insere_lef(l, cria_evento(entra->tempo + tpb, E_SAI, entra->dado1, heroi_id));
+
+    return 1;
+}
+
+/* Processa um evento AVISA */
+int ev_avisa(struct mundo *mundo, struct evento_t *avisa, struct lef_t *l)
+{
+    struct base *base = mundo->bases[avisa->dado1];
 
     while (base->presente->card < base->lotacao && base->espera->tamanho > 0)
     {
         int heroi_id;
         dequeue(base->espera, &heroi_id);
-        // Adiciona o herói ao conjunto de heróis presentes na base
-        // Supondo que você tenha funções para adicionar heróis à base
         adicionaHeroiNaBase(base, heroi_id);
-        // Cria evento ENTRA
-        // Supondo que você tenha uma função para adicionar um evento à lista de eventos
-        // adicionarEvento(criaEventoENTRA(avisa->tempo, heroi_id, base_id));
-        printf("Herói %d entrou na Base %d.\n", heroi_id, base_id);
+        insere_lef(l, cria_evento(avisa->tempo, E_ENTRA, base->idBase, heroi_id));
+        printf("Herói %d entrou na Base %d.\n", heroi_id, avisa->dado1);
+    }
+
+    return 1;
+}
+
+/* Processa um evento SAI */
+int ev_sai(struct mundo *mundo, struct evento_t *sai, struct lef_t *l)
+{
+    struct conjunto *herois_base;
+    int heroi_id, base_id, destino;
+
+    base_id = mundo->bases[sai->dado1]->idBase;
+    heroi_id = mundo->herois[sai->dado2]->id;
+    herois_base = mundo->bases[base_id]->presente;
+
+    retira_cjt(herois_base, heroi_id);
+
+    printf("%6d: SAI    HEROI %2d BASE %d (%2d/%2d)\n", sai->tempo, heroi_id, base_id,
+            mundo->bases[base_id]->presente->card, 
+                mundo->bases[base_id]->lotacao);
+
+    destino = aleato(0, N_BASES - 1);
+
+    insere_lef(l, cria_evento(sai->tempo, E_VIAJA, destino, heroi_id));
+    insere_lef(l, cria_evento(sai->tempo, E_AVISA, base_id, 0));
+
+    return 1;
+}
+
+/* Processa o evento FIM */
+void ev_fim(struct mundo *mundo, struct evento_t *fim, struct lef_t *l)
+{
+    imprime_herois_mundo(mundo);
+    imprime_missoes_mundo(mundo);
+    fim = destroi_evento(fim);
+
+    l = destroi_lef(l);
+
+    mundo = destroi_mundo(mundo);
+}
+
+void processa_eventos(struct mundo *m, struct lef_t *l)
+{
+    struct evento_t *evento;
+
+    // Percorre a LEF e processa os eventos
+    while ((evento = retira_lef(l)) != NULL)
+    {
+        switch (evento->tipo)
+        {
+        case E_CHEGA:
+            ev_chega(m, evento, l);
+            break;
+        case E_ESPERA:
+            ev_espera(m, evento, l);
+            break;
+        case E_DESISTE:
+            ev_desiste(m, evento, l);
+            break;
+        case E_AVISA:
+            ev_avisa(m, evento, l);
+            break;
+        case E_ENTRA:
+            ev_entra(m, evento, l);
+            break;
+        case E_SAI:
+            ev_sai(m, evento, l);
+            break;
+        case E_VIAJA:
+            ev_viaja(m, evento, l);
+            break;
+        }
+
+        if(evento->tipo == E_FIM)
+        {
+            ev_fim(m, evento, l);
+            return;
+        }
+
+        evento = destroi_evento(evento);
     }
 }
 
@@ -466,53 +538,26 @@ int main()
 {
     /* declarações de variáveis aqui */
     struct mundo *mundo;
-    struct evento_t *chegada_heroi;
+    struct lef_t *linha_do_tempo;
+
     srand(0);
 
     printf("\nIniciando o mundo, bases e heróis\n");
     mundo = cria_mundo();
 
-    // Vendo as habilidades do mundo
     printf("\nHabilidades existentes no mundo:\n");
     imprime_cjt(mundo->habilidades_mundo);
 
-    // Teste das funções de impressão
-    printf("\nPropriedades dos Heróis:\n");
-    imprime_herois_mundo(mundo);
+    printf("\nCriando a LEF\n");
+    linha_do_tempo = cria_lef();
 
-    printf("\nPropriedades das Bases:\n");
-    imprime_bases_mundo(mundo);
+    printf("\nEventos iniciais do mundo na linha do tempo\n");
+    inicializa_mundo(mundo, linha_do_tempo);
 
-    printf("\nPropriedades das Missões:\n");
-    imprime_missoes_mundo(mundo);
+    printf("\nProcessando os eventos do mundo\n");
+    processa_eventos(mundo, linha_do_tempo);
 
-    // Simulacao evento CHEGA
-    printf("\nEvento CHEGA\n");
-    chegada_heroi = cria_evchega(0, 0, 0);
-    process_evchega(mundo, chegada_heroi);
-    chegada_heroi = destroi_evento(chegada_heroi);
-
-    // Simulacao evento ESPERA
-    printf("\nEvento ESPERA\n");
-    struct evento_t *espera_heroi = cria_evespera(0, 1, 0);
-    process_evespera(mundo, espera_heroi);
-    espera_heroi = destroi_evento(espera_heroi);
-
-    // Simulação de um evento DESISTE
-    printf("\nEvento DESISTE\n");
-    struct evento_t *desiste_heroi = cria_evdesiste(10, 2, 0);
-    process_evdesiste(mundo, desiste_heroi);
-    desiste_heroi = destroi_evento(desiste_heroi);
-
-    // Simulação de um evento AVISA
-    printf("\nEvento AVISA\n");
-    struct evento_t *avisa_base = cria_avisa(20, 0);
-    process_avisa(mundo, avisa_base);
-    avisa_base = destroi_evento(avisa_base);
-
-    printf("\ndestruindo o mundo, bases e heróis\n");
-    /* Destruir tudo que iniciei dentro da função mundo. */
-    mundo = destroi_mundo(mundo);
+    printf("FIM DO MUNDO");
 
     return 0;
 }
