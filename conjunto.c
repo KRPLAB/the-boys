@@ -148,14 +148,22 @@ int insere_cjt(struct conjunto *c, int elemento)
         return 1;
 
     i = c->card - 1;
-    while (elemento < c->v[i])
+    while (elemento < c->v[i] && i > 0)
     {
         c->v[i + 1] = c->v[i];
         i--;
     }
 
-    c->v[i + 1] = elemento;
     c->card++;
+    
+    if (i == 0) 
+    {
+        c->v[i + 1] = c->v[i];
+        c->v[i + 1] = elemento;
+        return 1;
+    }
+
+    c->v[i + 1] = elemento;
 
     return 1;
 }
