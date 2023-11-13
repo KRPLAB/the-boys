@@ -123,3 +123,4 @@ void imprime_lef(struct lef_t *l)
 
     printf("Total %d eventos\n", total_eventos);
 }
+
