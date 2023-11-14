@@ -159,11 +159,12 @@ int insere_cjt(struct conjunto *c, int elemento)
     if (i == 0) 
     {
         c->v[i + 1] = c->v[i];
-        c->v[i + 1] = elemento;
+        c->v[i] = elemento;
         return 1;
     }
 
-    c->v[i + 1] = elemento;
+    c->v[i + 1] = c->v[i];
+    c->v[i] = elemento;
 
     return 1;
 }
