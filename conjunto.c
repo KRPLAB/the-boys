@@ -296,7 +296,8 @@ struct conjunto *interseccao_cjt(struct conjunto *c1, struct conjunto *c2)
 
 struct conjunto *uniao_cjt(struct conjunto *c1, struct conjunto *c2)
 {
-    struct conjunto *uni;
+    struct conjunto *uni, *diff;
+    int tam_max;
     int i = 0, j = 0, k = 0;
 
     if (!c1 || !c2)
@@ -308,7 +309,16 @@ struct conjunto *uniao_cjt(struct conjunto *c1, struct conjunto *c2)
     if (c2->card == 0)
         return copia_cjt(c1);
 
-    int tam_max = c1->card + c2->card;
+    if (c1->card >= c2->card)
+    {
+        diff = diferenca_cjt(c1, c2);
+        tam_max = diff->card + c1->card;
+    }
+    else
+    {
+        diff = diferenca_cjt(c2, c1);
+        tam_max = diff->card + c2->card;
+    }
 
     if (!(uni = cria_cjt(tam_max)))
         return NULL;
@@ -352,6 +362,7 @@ struct conjunto *uniao_cjt(struct conjunto *c1, struct conjunto *c2)
 
     uni->card = k;
 
+    destroi_cjt(diff);
     return uni;
 }
 
@@ -411,7 +422,7 @@ void imprime_cjt(struct conjunto *c)
 {
     if (!(c) || !(c->card))
     {
-        printf("conjunto vazio\n");
+        printf("[ ]\n");
         return;
     }
 
