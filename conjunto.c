@@ -132,40 +132,14 @@ int pertence_cjt(struct conjunto *c, int elemento)
 
 int insere_cjt(struct conjunto *c, int elemento)
 {
-    int i;
-
-    if (c->card == c->max)
+    if (c->card >= c->max)
         return 0;
 
-    if (vazio_cjt(c))
-    {
-        c->v[c->card] = elemento;
-        c->card++;
-        return 1;
-    }
+    for (int i = 0; i < c->card; i++)
+        if (c->v[i] == elemento)
+            return 1;
 
-    else if (pertence_cjt(c, elemento))
-        return 1;
-
-    i = c->card - 1;
-    while (elemento < c->v[i] && i > 0)
-    {
-        c->v[i + 1] = c->v[i];
-        i--;
-    }
-
-    c->card++;
-    
-    if (i == 0) 
-    {
-        c->v[i + 1] = c->v[i];
-        c->v[i] = elemento;
-        return 1;
-    }
-
-    c->v[i + 1] = c->v[i];
-    c->v[i] = elemento;
-
+    c->v[c->card++] = elemento;
     return 1;
 }
 
