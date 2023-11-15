@@ -124,10 +124,11 @@ int cardinalidade_cjt(struct conjunto *c)
 
 int pertence_cjt(struct conjunto *c, int elemento)
 {
-    if (vazio_cjt(c))
-        return 0;
+    for (int i = 0; i < c->card; i++)
+        if (c->v[i] == elemento)
+            return 1;
 
-    return busca_binaria(elemento, c) != -1;
+    return 0;
 }
 
 int insere_cjt(struct conjunto *c, int elemento)
@@ -160,27 +161,11 @@ int retira_cjt(struct conjunto *c, int elemento)
 
 int contido_cjt(struct conjunto *c1, struct conjunto *c2)
 {
-    int i, j;
-
-    if (c1->card > c2->card)
-        return 0;
-
-    i = 0;
-    j = 0;
-    while (i < c1->card && j < c2->card)
-    {
-        if (c1->v[i] < c2->v[j])
+    for (int i = 0; i < c1->card; i++)
+        if (!pertence_cjt(c2, c1->v[i]))
             return 0;
-        if (c1->v[i] > c2->v[j])
-            j++;
-        else
-        {
-            i++;
-            j++;
-        }
-    }
 
-    return i >= c1->card;
+    return 1;
 }
 
 int sao_iguais_cjt(struct conjunto *c1, struct conjunto *c2)
