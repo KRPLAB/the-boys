@@ -2,37 +2,7 @@
 #include <stdlib.h>
 #include "conjunto.h"
 
-/* ---- Funcoes auxiliares de busca e ordenacao e randomizacao ---- */
-
-/*
- * Retorna o indice do vetor que contem o elemento x buscado,
- * caso contrario retorna -1.
- * Serah usada nas funcoes que verifica se um elemento pertence a um
- * conjunto e tambem na funcao para remover um elemento.
- */
-int busca_binaria(int x, struct conjunto *c)
-{
-    int ini, fim, meio;
-
-    ini = 0;
-    fim = c->card - 1;
-    meio = (ini + fim) / 2;
-
-    while (ini <= fim && x != c->v[meio])
-    {
-        if (x < c->v[meio])
-            fim = meio - 1;
-        else
-            ini = meio + 1;
-
-        meio = (ini + fim) / 2;
-    }
-
-    if (fim < ini)
-        return -1;
-
-    return meio;
-}
+/* ---- Funcoes auxiliares para ordenacao e randomizacao ---- */
 
 /* troca numeros */
 void swap(int *a, int *b)
@@ -146,17 +116,15 @@ int insere_cjt(struct conjunto *c, int elemento)
 
 int retira_cjt(struct conjunto *c, int elemento)
 {
-    int i;
-
-    i = busca_binaria(elemento, c);
-    if (i == -1)
-        return 0;
-
-    for (int j = i; j < c->card - 1; j++)
-        c->v[j] = c->v[j + 1];
-    c->card--;
-
-    return 1;
+    for (int i = 0; i < c->card; i++)
+        if (c->v[i] == elemento)
+        {
+            for (int j = i; j < c->card - 1; j++)
+                c->v[j] = c->v[j + 1];
+            c->card--;
+            return 1;
+        }
+    return 0;
 }
 
 int contido_cjt(struct conjunto *c1, struct conjunto *c2)
