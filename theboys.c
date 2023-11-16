@@ -143,7 +143,7 @@ struct heroi *cria_heroi(int id, struct mundo *m)
     h->habilidades_heroi = cria_subcjt_cjt(m->habilidades_mundo, aleato(1, 3));
 
     return h;
-};
+}
 
 /* Destroi um heroi liberando a memoria do conjunto de
  * habilidades retornando NULL. */
@@ -299,15 +299,6 @@ struct conjunto *habs_base(struct base *b, struct mundo *mundo)
     return habs_totais_base;
 }
 
-/* Verifica se uma equipe estah apta para cumprir uma missao */
-int equipe_apta(struct base *base, struct missao *missao_atual, struct mundo *mundo)
-{
-    struct conjunto *habs_totais_base = habs_base(base, mundo);
-    int aptos = contido_cjt(missao_atual->habilidades_necessarias, habs_totais_base);
-    destroi_cjt(habs_totais_base);
-    return aptos;
-}
-
 /* ---------------- Funcoes que tratam do mundo ---------------- */
 struct mundo *cria_mundo()
 {
@@ -369,7 +360,7 @@ void inicializa_mundo(struct mundo *mundo, struct lef_t *l)
 {
     int base, tempo;
 
-    for (int i = 0; i < N_HEROIS; i++)
+    for (int i = 0; i < mundo->n_herois; i++)
     {
         base = aleato(0, N_BASES - 1);
         tempo = aleato(0, 4320);
@@ -377,7 +368,7 @@ void inicializa_mundo(struct mundo *mundo, struct lef_t *l)
     }
 
     // gerando eventos iniciais para cada missão
-    for (int i = 0; i < N_MISSOES; i++)
+    for (int i = 0; i < mundo->n_missoes; i++)
     {
         tempo = aleato(0, T_FIM_DO_MUNDO);
         insere_lef(l, cria_evento(tempo, E_MISSAO, i, 0));
@@ -496,7 +487,7 @@ int ev_desiste(struct mundo *mundo, struct evento_t *desiste, struct lef_t *l)
 
     base_id = desiste->dado1;
     heroi_id = desiste->dado2;
-    destino_id = aleato(0, N_BASES - 1);
+    destino_id = aleato(0, mundo->n_bases - 1);
 
     insere_lef(l, cria_evento(desiste->tempo, E_VIAJA, destino_id, heroi_id));
     printf("%6d: DESIST HEROI %2d BASE %d\n", desiste->tempo, heroi_id, base_id);
@@ -590,20 +581,20 @@ int ev_missao(struct mundo *mundo, struct evento_t *missao, struct lef_t *l)
     for (int i = 0; i < N_BASES; i++)
     {
         habs_base_ord[i] = habs_base(mundo->bases[bases_dist_ord[i]], mundo);
-        printf("%6d: MISSAO %d HAB BASE %d: ", missao->tempo, missao->dado1, 
-                mundo->bases[bases_dist_ord[i]]->idBase);
+        printf("%6d: MISSAO %d HAB BASE %d: ", missao->tempo, missao->dado1,
+               mundo->bases[bases_dist_ord[i]]->idBase);
         imprime_cjt(habs_base_ord[i]);
     }
 
-    /* verificando se o conjunto de habilidades necessarias para realizar a missao 
+    /* verificando se o conjunto de habilidades necessarias para realizar a missao
      * estah contido no conjunto de habilidades presentes na base*/
     base_cumprida = -1;
     for (int i = 0; i < N_BASES; i++)
     {
         if (contido_cjt(missao_atual->habilidades_necessarias, habs_base_ord[i]))
         {
-            printf("%6d: MISSAO %d CUMPRIDA BASE %d HEROIS: ", missao->tempo, missao->dado1, 
-                    mundo->bases[bases_dist_ord[i]]->idBase);
+            printf("%6d: MISSAO %d CUMPRIDA BASE %d HEROIS: ", missao->tempo, missao->dado1,
+                   mundo->bases[bases_dist_ord[i]]->idBase);
             imprime_cjt(mundo->bases[bases_dist_ord[i]]->presente);
             incrementa_exp(mundo->bases[bases_dist_ord[i]], mundo);
             missao_atual->conclusao = 1;
@@ -642,7 +633,7 @@ void processa_eventos(struct mundo *m, struct lef_t *l)
 {
     struct evento_t *evento;
 
-    // Percorre a lef enquanto o evento for valido OU 
+    // Percorre a lef enquanto o evento for valido OU
     // enquanto o evento->tempo != T_FIM_DO_MUNDO
     while ((evento = retira_lef(l)) != NULL)
     {
