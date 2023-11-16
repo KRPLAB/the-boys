@@ -297,14 +297,13 @@ struct conjunto *uniao_cjt(struct conjunto *c1, struct conjunto *c2)
         }
         else
         {
-            uni->v[k] = c1->v[i]; // Ou c2->v[j], pois ambos são iguais
+            uni->v[k] = c1->v[i];
             i++;
             j++;
         }
         k++;
     }
 
-    // Copie os elementos restantes de c1, se houver
     while (i < c1->card)
     {
         uni->v[k] = c1->v[i];
@@ -312,7 +311,6 @@ struct conjunto *uniao_cjt(struct conjunto *c1, struct conjunto *c2)
         k++;
     }
 
-    // Copie os elementos restantes de c2, se houver
     while (j < c2->card)
     {
         uni->v[k] = c2->v[j];

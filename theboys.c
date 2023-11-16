@@ -127,6 +127,8 @@ void quicksort(int v[], struct mundo *m, int min, int max, struct coordenada loc
 
 /* ---------------- Funcoes que tratam dos herois no mundo ---------------- */
 
+/* Cria um heroi e devolve um ponteiro para ele em caso de
+ * sucesso ou retorna NULL em caso de falha */
 struct heroi *cria_heroi(int id, struct mundo *m)
 {
     struct heroi *h;
@@ -143,38 +145,42 @@ struct heroi *cria_heroi(int id, struct mundo *m)
     return h;
 };
 
+/* Destroi um heroi liberando a memoria do conjunto de
+ * habilidades retornando NULL. */
 struct heroi *destroi_heroi(struct heroi *heroi)
 {
     heroi->habilidades_heroi = destroi_cjt(heroi->habilidades_heroi);
     free(heroi);
-    return heroi;
+    return NULL;
 }
 
+/* Incrementa experiência para os herois presentes na base
+ * apos concluirem uma missao */
 void incrementa_exp(struct base *b, struct mundo *m)
 {
     for (int i = 0; i < b->presente->card; i++)
         m->herois[b->presente->v[i]]->experiencia++;
 }
 
+/* Imprime todos os herois do mundo e seus atributos */
 void imprime_herois_mundo(struct mundo *m)
 {
-    if (m)
+    for (int i = 0; i < m->n_herois; i++)
     {
-        for (int i = 0; i < m->n_herois; i++)
+        struct heroi *heroi = m->herois[i];
+        if (heroi)
         {
-            struct heroi *heroi = m->herois[i];
-            if (heroi)
-            {
-                printf("HEROI %2d PAC %3d VEL %4d EXP %4d HABS ", heroi->id,
-                       heroi->paciencia, heroi->velocidade, heroi->experiencia);
-                imprime_cjt(heroi->habilidades_heroi);
-            }
+            printf("HEROI %2d PAC %3d VEL %4d EXP %4d HABS ", heroi->id,
+                   heroi->paciencia, heroi->velocidade, heroi->experiencia);
+            imprime_cjt(heroi->habilidades_heroi);
         }
     }
 }
 
 /* ---------------- Funcoes que tratam das bases no mundo ---------------- */
 
+/* Cria uma base e devolve um ponteiro para ela em caso de
+ * sucesso ou retorna NULL em caso de falha */
 struct base *cria_base(int id)
 {
     struct base *b;
@@ -192,36 +198,34 @@ struct base *cria_base(int id)
     return b;
 }
 
-/* destruir uma base */
+/* Destroi uma base liberando a memoria da fila de espera e
+ * o conjunto de herois presentes retornando NULL. */
 struct base *destroi_base(struct base *b)
 {
     fila_destroi(&b->espera);
     destroi_cjt(b->presente);
-
     free(b);
 
     return NULL;
 }
 
-// Função para imprimir as propriedades das bases
+/* Imprime todas as bases do mundo e seus atributos */
 void imprime_bases_mundo(struct mundo *m)
 {
-    if (m)
+
+    for (int i = 0; i < m->n_bases; i++)
     {
-        for (int i = 0; i < m->n_bases; i++)
+        struct base *base = m->bases[i];
+        if (base)
         {
-            struct base *base = m->bases[i];
-            if (base)
-            {
-                printf("Base %d:\n", base->idBase);
-                printf("Lotação: %d\n", base->lotacao);
-                printf("Localização: (%d, %d)\n", base->local_base.x, base->local_base.y);
-                printf("Heróis Presentes na Base:\n");
-                imprime_cjt(base->presente);
-                printf("Heróis na Fila de Espera:\n");
-                fila_imprime(base->espera);
-                printf("\n");
-            }
+            printf("Base %d:\n", base->idBase);
+            printf("Lotação: %d\n", base->lotacao);
+            printf("Localização: (%d, %d)\n", base->local_base.x, base->local_base.y);
+            printf("Heróis Presentes na Base:\n");
+            imprime_cjt(base->presente);
+            printf("Heróis na Fila de Espera:\n");
+            fila_imprime(base->espera);
+            printf("\n");
         }
     }
 }
@@ -247,15 +251,13 @@ struct missao *cria_missao(int id, struct mundo *mundo)
 
 struct missao *destroi_missao(struct missao *missao)
 {
-    if (missao)
-    {
-        missao->habilidades_necessarias = destroi_cjt(missao->habilidades_necessarias);
-        free(missao);
-    }
+    missao->habilidades_necessarias = destroi_cjt(missao->habilidades_necessarias);
+    free(missao);
+
     return NULL;
 }
 
-// Função para imprimir as propriedades das missões
+/* Imprime missoes concluidas e tentativa/missao */
 void imprime_missoes_mundo(struct mundo *m)
 {
     int tot_concluidas;
@@ -277,6 +279,9 @@ void imprime_missoes_mundo(struct mundo *m)
            tot_tentativas / (float)N_MISSOES);
 }
 
+/* Cria e retorna um ponteiro, em caso de sucesso, para o conjunto
+ * de habilidades dos herois presentes em uma base. Em caso de falha
+ * retorna NULL. */
 struct conjunto *habs_base(struct base *b, struct mundo *mundo)
 {
     struct conjunto *habs_totais_base;
@@ -328,7 +333,8 @@ struct mundo *cria_mundo()
     for (int i = 0; i < N_HABILIDADES; i++)
         insere_cjt(m->habilidades_mundo, i);
 
-    /* cria os herois do mundo */
+    /* criando entidades do mundo */
+
     for (int i = 0; i < N_HEROIS; i++)
         m->herois[i] = cria_heroi(i, m);
 
@@ -363,18 +369,17 @@ void inicializa_mundo(struct mundo *mundo, struct lef_t *l)
 {
     int base, tempo;
 
-    // gerando eventos iniciais para cada heroi
     for (int i = 0; i < N_HEROIS; i++)
     {
         base = aleato(0, N_BASES - 1);
-        tempo = aleato(0, 4321);
+        tempo = aleato(0, 4320);
         insere_lef(l, cria_evento(tempo, E_CHEGA, base, i));
     }
 
     // gerando eventos iniciais para cada missão
     for (int i = 0; i < N_MISSOES; i++)
     {
-        tempo = aleato(0, T_FIM_DO_MUNDO + 1);
+        tempo = aleato(0, T_FIM_DO_MUNDO);
         insere_lef(l, cria_evento(tempo, E_MISSAO, i, 0));
     }
 
@@ -383,6 +388,15 @@ void inicializa_mundo(struct mundo *mundo, struct lef_t *l)
 }
 
 /*-------------------------------------Funcoes para tratar dos eventos-------------------------*/
+
+/* Ordena os ID's das bases de acordo com sua distancia da missao */
+void ord_distancia_base(int vetor_indices_bases[], struct mundo *mundo, struct missao *missao_d)
+{
+    for (int i = 0; i < N_BASES; i++)
+        vetor_indices_bases[i] = i;
+
+    quicksort(vetor_indices_bases, mundo, 0, N_BASES - 1, missao_d->local_missao);
+}
 
 void adicionaHeroiNaBase(struct base *base, int heroi_id)
 {
@@ -559,47 +573,56 @@ int ev_sai(struct mundo *mundo, struct evento_t *sai, struct lef_t *l)
 int ev_missao(struct mundo *mundo, struct evento_t *missao, struct lef_t *l)
 {
     struct missao *missao_atual;
-    int missao_id;
+    struct conjunto *habs_base_ord[N_BASES];
+    int bases_dist_ord[N_BASES];
+    int base_cumprida;
 
-    missao_id = missao->dado1;
-    missao_atual = mundo->missoes[missao_id];
+    missao_atual = mundo->missoes[missao->dado1];
     missao_atual->tentativas++;
 
-    printf("%6d: MISSAO %d HAB REQ: ", missao->tempo, missao_id);
+    /* impressao das informacoes da missao como : ID e habilidades requeridas */
+    printf("%6d: MISSAO %d HAB REQ: ", missao->tempo, missao->dado1);
     imprime_cjt(missao_atual->habilidades_necessarias);
 
-    int bases_dist[N_BASES];
+    /* preenchendo o vetor com os id's das bases de acordo com a distancia
+     * e em seguida imprimindo as habilidades presentes na base */
+    ord_distancia_base(bases_dist_ord, mundo, missao_atual);
     for (int i = 0; i < N_BASES; i++)
     {
-        bases_dist[i] = i;
+        habs_base_ord[i] = habs_base(mundo->bases[bases_dist_ord[i]], mundo);
+        printf("%6d: MISSAO %d HAB BASE %d: ", missao->tempo, missao->dado1, 
+                mundo->bases[bases_dist_ord[i]]->idBase);
+        imprime_cjt(habs_base_ord[i]);
     }
 
-    quicksort(bases_dist, mundo, 0, N_BASES - 1, missao_atual->local_missao);
-
+    /* verificando se o conjunto de habilidades necessarias para realizar a missao 
+     * estah contido no conjunto de habilidades presentes na base*/
+    base_cumprida = -1;
     for (int i = 0; i < N_BASES; i++)
     {
-        struct conjunto *habs_equipe_base = habs_base(mundo->bases[bases_dist[i]], mundo);
-
-        printf("%6d: MISSAO %d HAB BASE %d: ", missao->tempo, missao_id, mundo->bases[bases_dist[i]]->idBase);
-        imprime_cjt(habs_equipe_base);
-
-        if (contido_cjt(missao_atual->habilidades_necessarias, habs_equipe_base))
+        if (contido_cjt(missao_atual->habilidades_necessarias, habs_base_ord[i]))
         {
-            printf("%6d: MISSAO %d CUMPRIDA BASE %d HEROIS: ", missao->tempo, missao_id, mundo->bases[bases_dist[i]]->idBase);
-            imprime_cjt(mundo->bases[bases_dist[i]]->presente);
-            incrementa_exp(mundo->bases[bases_dist[i]], mundo);
+            printf("%6d: MISSAO %d CUMPRIDA BASE %d HEROIS: ", missao->tempo, missao->dado1, 
+                    mundo->bases[bases_dist_ord[i]]->idBase);
+            imprime_cjt(mundo->bases[bases_dist_ord[i]]->presente);
+            incrementa_exp(mundo->bases[bases_dist_ord[i]], mundo);
             missao_atual->conclusao = 1;
-            destroi_cjt(habs_equipe_base);
-            return 1;
+            base_cumprida = i;
+            break;
         }
-
-        destroi_cjt(habs_equipe_base);
     }
 
-    insere_lef(l, cria_evento(missao->tempo + (24 * 60), E_MISSAO, missao_id, 0));
-    printf("%6d: MISSAO %d IMPOSSIVEL\n", missao->tempo, missao_id);
+    for (int i = 0; i < N_BASES; i++)
+        destroi_cjt(habs_base_ord[i]);
 
-    return 0;
+    if (base_cumprida == -1)
+    {
+        insere_lef(l, cria_evento(missao->tempo + (24 * 60), E_MISSAO, missao->dado1, 0));
+        printf("%6d: MISSAO %d IMPOSSIVEL\n", missao->tempo, missao->dado1);
+        return 0;
+    }
+
+    return 1;
 }
 
 /* Processa o evento FIM */
@@ -619,7 +642,8 @@ void processa_eventos(struct mundo *m, struct lef_t *l)
 {
     struct evento_t *evento;
 
-    // Percorre a LEF e processa os eventos
+    // Percorre a lef enquanto o evento for valido OU 
+    // enquanto o evento->tempo != T_FIM_DO_MUNDO
     while ((evento = retira_lef(l)) != NULL)
     {
         switch (evento->tipo)
@@ -664,7 +688,7 @@ void processa_eventos(struct mundo *m, struct lef_t *l)
 
 int main()
 {
-    /* declarações de variáveis aqui */
+
     struct mundo *mundo;
     struct lef_t *linha_do_tempo;
 
@@ -674,10 +698,8 @@ int main()
 
     linha_do_tempo = cria_lef();
 
-    printf("\nEventos iniciais do mundo na linha do tempo\n");
     inicializa_mundo(mundo, linha_do_tempo);
 
-    printf("\nProcessando os eventos do mundo\n");
     processa_eventos(mundo, linha_do_tempo);
 
     return 0;
