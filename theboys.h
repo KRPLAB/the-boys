@@ -1,6 +1,12 @@
 #ifndef THEBOYS_H
 #define THEBOYS_H
 
+#define T_FIM_DO_MUNDO 525600
+#define TAMANHO_MUNDO 20000
+#define N_HABILIDADES 10
+#define N_HEROIS (N_HABILIDADES * 5)
+#define N_BASES (N_HEROIS / 6)
+#define N_MISSOES (T_FIM_DO_MUNDO / 100)
 /* ------------------------- Definicao das structs padroes ------------------------- */
 struct coordenada
 {
@@ -38,9 +44,9 @@ struct missao
 
 struct mundo
 {
-    struct missao missoes[];                /* vetor de missoes no mundo. */
-    struct heroi herois[];                  /* vetor de herois no mundo. */
-    struct base bases[];                    /* vetor de bases no mundo. */
+    struct missao missoes[N_MISSOES];                /* vetor de missoes no mundo. */
+    struct heroi herois[N_HEROIS];                  /* vetor de herois no mundo. */
+    struct base bases[N_MISSOES];                    /* vetor de bases no mundo. */
     struct conjunto *habilidades_mundo;     /* conjunto de todas as habilidades presentes no mundo. */
     int n_herois;                           /* numero de herois no mundo. */
     int n_bases;                            /* numero de bases no mundo. */
@@ -69,10 +75,10 @@ struct conjunto *habs_base(struct base *b, struct mundo *mundo);
 /* ========================== Funcoes que tratam dos herois no mundo =========================== */
 
 /* Cria um novo heroi e retorna um ponteiro para ele. */
-struct heroi *cria_heroi(int id, struct mundo *m);
+struct heroi cria_heroi(int id, struct mundo *m);
 
 /* Libera a memoria alocada para um heroi e retorna NULL. */
-struct heroi *destroi_heroi(struct heroi *heroi);
+struct heroi destroi_heroi(struct heroi *heroi);
 
 /* Incrementa a experiencia dos herois presentes em uma base. */
 void incrementa_exp(struct base *b, struct mundo *m);
@@ -84,11 +90,11 @@ void imprime_herois_mundo(struct mundo *m);
 /* =========================== Funcoes que tratam das bases no mundo =========================== */
 
 /* Cria uma nova base com o ID especificado e retorna um ponteiro para ela. */
-struct base *cria_base(int id);
+struct base cria_base(int id);
 
 /* Libera a memoria alocada para uma base, incluindo a fila de espera e o 
  * conjunto de herois presentes. Retorna NULL. */
-struct base *destroi_base(struct base *b);
+struct base destroi_base(struct base *b);
 
 /* Imprime informacoes sobre todas as bases no mundo. */
 void imprime_bases_mundo(struct mundo *m);
@@ -98,11 +104,11 @@ void imprime_bases_mundo(struct mundo *m);
 
 /* Cria uma nova missao com o ID especificado, associando-a ao 
  * mundo fornecido, e retorna um ponteiro para ela. */
-struct missao *cria_missao(int id, struct mundo *mundo);
+struct missao cria_missao(int id, struct mundo *mundo);
 
 /* Libera a memoria alocada para uma missao, incluindo o conjunto de 
  * habilidades necessarias. Retorna NULL. */
-struct missao *destroi_missao(struct missao *missao);
+struct missao destroi_missao(struct missao *missao);
 
 /* Imprime informacoes sobre as missoes no mundo, incluindo a quantidade 
  * cumprida, a porcentagem cumprida e a media de tentativas por missao. */
