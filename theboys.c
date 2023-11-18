@@ -4,13 +4,7 @@
 #include "conjunto.h"
 #include "fila.h"
 #include "lef.h"
-
-#define T_FIM_DO_MUNDO 525600
-#define TAMANHO_MUNDO 20000
-#define N_HABILIDADES 10
-#define N_HEROIS (N_HABILIDADES * 5)
-#define N_BASES (N_HEROIS / 6)
-#define N_MISSOES (T_FIM_DO_MUNDO / 100)
+#include "theboys.h"
 
 #define E_CHEGA 1
 #define E_ESPERA 2
@@ -21,54 +15,6 @@
 #define E_VIAJA 7
 #define E_MISSAO 8
 #define E_FIM 9
-
-struct coordenada
-{
-    int x;
-    int y;
-};
-
-struct heroi
-{
-    int id;
-    struct conjunto *habilidades_heroi;
-    int paciencia;
-    int velocidade;
-    int experiencia;
-    int id_base;
-};
-
-struct base
-{
-    int id;
-    int lotacao;
-    struct conjunto *presente;
-    struct fila *espera;
-    struct coordenada local_base;
-};
-
-struct missao
-{
-    int id;
-    int conclusao;
-    int tentativas;
-    struct conjunto *habilidades_necessarias;
-    struct coordenada local_missao;
-};
-
-struct mundo
-{
-    struct missao missoes[N_MISSOES];
-    struct heroi herois[N_HEROIS];
-    struct base bases[N_BASES];
-    struct conjunto *habilidades_mundo;
-    int n_herois;
-    int n_bases;
-    int n_missoes;
-    int n_habilidades;
-    int tamanho_mundo;
-    int timer_mundo;
-};
 
 int aleato(int min, int max)
 {
@@ -204,7 +150,7 @@ struct missao cria_missao(int id, struct mundo *mundo)
     struct missao missao;
 
     missao.id = id;
-    missao.habilidades_necessarias = cria_subcjt_cjt(mundo->habilidades_mundo, aleato(6, 10));
+    missao.habs_necessarias = cria_subcjt_cjt(mundo->habilidades_mundo, aleato(6, 10));
     missao.local_missao.x = aleato(0, TAMANHO_MUNDO - 1);
     missao.local_missao.y = aleato(0, TAMANHO_MUNDO - 1);
     missao.conclusao = 0;
@@ -215,7 +161,7 @@ struct missao cria_missao(int id, struct mundo *mundo)
 
 struct missao destroi_missao(struct missao *missao)
 {
-    missao->habilidades_necessarias = destroi_cjt(missao->habilidades_necessarias);
+    missao->habs_necessarias = destroi_cjt(missao->habs_necessarias);
 
     return (*missao);
 }
@@ -521,7 +467,7 @@ int ev_missao(struct mundo *mundo, struct evento_t *missao, struct lef_t *l)
 
     /* impressao das informacoes da missao como : ID e habilidades requeridas */
     printf("%6d: MISSAO %d HAB REQ: ", missao->tempo, missao->dado1);
-    imprime_cjt(missao_atual->habilidades_necessarias);
+    imprime_cjt(missao_atual->habs_necessarias);
 
     /* preenchendo o vetor com os id's das bases de acordo com a distancia
      * e em seguida imprimindo as habilidades presentes na base */
@@ -539,7 +485,7 @@ int ev_missao(struct mundo *mundo, struct evento_t *missao, struct lef_t *l)
     base_cumprida = -1;
     for (int i = 0; i < N_BASES; i++)
     {
-        if (contido_cjt(missao_atual->habilidades_necessarias, habs_base_ord[i]))
+        if (contido_cjt(missao_atual->habs_necessarias, habs_base_ord[i]))
         {
             printf("%6d: MISSAO %d CUMPRIDA BASE %d HEROIS: ", missao->tempo, missao->dado1,
                    mundo->bases[bases_dist_ord[i]].id);
