@@ -69,3 +69,7 @@ repetir
     fim
 até o fim da simulação
 apresentar resultados
+
+## Implementação do Projeto
+
+A implementação do projeto consiste na criação da biblioteca `theboys.h` e na implementação dessa biblioteca no arquivo `theboys.c`. O projeto foi implementado utilizando as TAD's (Tipo Abstrato de Dados) Conjunto, Fila e LEF (Lista de Eventos Futuros).
