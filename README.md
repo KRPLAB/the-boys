@@ -18,7 +18,7 @@ Este projeto consiste em simular a dinâmica desse mundo durante um ano (525.600
 
 Simular é construir e executar um modelo computacional que imita de forma aproximada a realidade e sua evolução ao longo do tempo. A simulação é uma ferramenta muito usada no estudo de fenômenos naturais, como técnica de ensino (oferecendo para os alunos um ambiente onde é possível experimentar e errar sem as consequências do ambiente real) e também em muitos jogos eletrônicos. A simulação de eventos discretos (SED) é uma forma de simulação que modela a dinâmica de um sistema como uma sequência de eventos ocorrendo ao longo do tempo.
 
-- O modelo de simulação possui uma estrutura estática e uma estrutura dinâmica:
+O modelo de simulação possui uma estrutura estática e uma estrutura dinâmica:
   - Estrutura estática: descreve as entidades do sistema com seus atributos; o valor desses atributos em um dado momento define o estado do sistema.
   - Estrutura dinâmica: descreve como o estado do sistema evolui; geralmente é definida através de uma sequência de eventos agendados ao longo do tempo, que alteram os atributos das entidade do sistema e podem criar novos eventos.
   - Um simulador é um programa que executa os eventos e evolui o modelo de simulação no tempo. Para isso, ele mantém um relógio global, representando o tempo atual no modelo, e uma Lista de Eventos Futuros (LEF),
@@ -43,15 +43,15 @@ Simular é construir e executar um modelo computacional que imita de forma aprox
     ...
     ```
 
-    O relógio do simulador geralmente é um número inteiro que representa o tempo no sistema simulado e não tem relação direta com o tempo físico. Dependendo do modelo, cada unidade de tempo simulado pode representar microssegundos (em uma simulação de circuitos lógicos), minutos (simulação de tráfego) ou mesmo milhares de anos (simulação geológica).
+O relógio do simulador geralmente é um número inteiro que representa o tempo no sistema simulado e não tem relação direta com o tempo físico. Dependendo do modelo, cada unidade de tempo simulado pode representar microssegundos (em uma simulação de circuitos lógicos), minutos (simulação de tráfego) ou mesmo milhares de anos (simulação geológica).
 
-- Executar a simulação consiste basicamente em processar os eventos em sequência, atualizando o estado do sistema a cada evento. Entre dois eventos consecutivos o estado do sistema não se altera, por isso o relógio do simulador pode saltar diretamente de um evento ao próximo. Dessa forma, o ciclo básico de funcionamento do simulador é bem simples:
+Executar a simulação consiste basicamente em processar os eventos em sequência, atualizando o estado do sistema a cada evento. Entre dois eventos consecutivos o estado do sistema não se altera, por isso o relógio do simulador pode saltar diretamente de um evento ao próximo. Dessa forma, o ciclo básico de funcionamento do simulador é bem simples:
 
   1. retirar o primeiro evento da lista de eventos
   2. atualizar o relógio
   3. tratar o evento:
-     1. atualizar o estado do sistema
-     2. agendar novos eventos porventura criados
+     a. atualizar o estado do sistema
+     b. agendar novos eventos porventura criados
   4. repetir até concluir a simulação
 
 Isso pode ser traduzido no seguinte pseudocódigo:
