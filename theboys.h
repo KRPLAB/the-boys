@@ -7,6 +7,7 @@
 #define N_HEROIS (N_HABILIDADES * 5)
 #define N_BASES (N_HEROIS / 6)
 #define N_MISSOES (T_FIM_DO_MUNDO / 100)
+
 /* ------------------------- Definicao das structs padroes ------------------------- */
 struct coordenada
 {
