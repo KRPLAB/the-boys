@@ -557,13 +557,10 @@ void processa_eventos(struct mundo *m, struct lef_t *l)
             ev_missao(m, evento, l);
             break;
         }
-
-        if (evento->tipo == E_FIM)
-        {
+        case E_FIM:
             ev_fim(m, evento, l);
             return;
-        }
-
+            
         evento = destroi_evento(evento);
     }
 }
