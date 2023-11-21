@@ -46,14 +46,15 @@ O relógio do simulador geralmente é um número inteiro que representa o tempo 
 
 Executar a simulação consiste basicamente em processar os eventos em sequência, atualizando o estado do sistema a cada evento. Entre dois eventos consecutivos o estado do sistema não se altera, por isso o relógio do simulador pode saltar diretamente de um evento ao próximo. Dessa forma, o ciclo básico de funcionamento do simulador é bem simples:
 
-  1. retirar o primeiro evento da lista de eventos
-  2. atualizar o relógio
-  3. tratar o evento:
-     a. atualizar o estado do sistema
-     b. agendar novos eventos porventura criados
-  4. repetir até concluir a simulação
+1. retirar o primeiro evento da lista de eventos
+2. atualizar o relógio
+3. tratar o evento:
+   - atualizar o estado do sistema
+   - agendar novos eventos porventura criados
+4. repetir até concluir a simulação
 
 Isso pode ser traduzido no seguinte pseudocódigo:
+
 
 ```plaintext
 iniciar as entidades e atributos do mundo
