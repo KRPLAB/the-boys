@@ -21,9 +21,8 @@ Simular é construir e executar um modelo computacional que imita de forma aprox
 O modelo de simulação possui uma estrutura estática e uma estrutura dinâmica:
   - Estrutura estática: descreve as entidades do sistema com seus atributos; o valor desses atributos em um dado momento define o estado do sistema.
   - Estrutura dinâmica: descreve como o estado do sistema evolui; geralmente é definida através de uma sequência de eventos agendados ao longo do tempo, que alteram os atributos das entidade do sistema e podem criar novos eventos.
-  - Um simulador é um programa que executa os eventos e evolui o modelo de simulação no tempo. Para isso, ele mantém um relógio global, representando o tempo atual no modelo, e uma Lista de Eventos Futuros (LEF),
 
-    que é basicamente uma lista de eventos ordenada por datas de ocorrência crescentes, como em uma agenda:
+Um simulador é um programa que executa os eventos e evolui o modelo de simulação no tempo. Para isso, ele mantém um relógio global, representando o tempo atual no modelo, e uma Lista de Eventos Futuros (LEF), que é basicamente uma lista de eventos ordenada por datas de ocorrência crescentes, como em uma agenda:
 
     ```
     10:00 ir ao dentista
