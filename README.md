@@ -1,5 +1,7 @@
 # The Boys
 
+![Texto Alternativo](https://imgur.com/g5DSDuM)
+
 ## Resumo
 
 Trabalho avaliativo realizado para a disciplina de graduação Programação I (CI1001) do curso Bacharelado em Ciência da Computação da UFPR.
@@ -75,3 +77,4 @@ apresentar resultados
 ## Implementação do Projeto
 
 A implementação do projeto consiste na criação da biblioteca `theboys.h` e na implementação dessa biblioteca no arquivo `theboys.c`. O projeto foi implementado utilizando as TAD's (Tipo Abstrato de Dados) Conjunto, Fila e LEF (Lista de Eventos Futuros).
+
