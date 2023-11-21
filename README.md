@@ -1,6 +1,6 @@
 # The Boys
 
-![Texto Alternativo](https://imgur.com/g5DSDuM)
+![Texto Alternativo]([https://imgur.com/g5DSDuM](https://i.imgur.com/g5DSDuM.jpeg))
 
 ## Resumo
 
